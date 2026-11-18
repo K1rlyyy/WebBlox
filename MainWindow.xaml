@@ -1,0 +1,420 @@
+<Window x:Class="WebBlox.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WebBlox — Visual HTML Builder" Icon="pack://application:,,,/Assets/WebBloxLogo.ico" Height="920" Width="1600"
+        MinHeight="700" MinWidth="1120" Background="{DynamicResource ThemeWindowBrush}"
+        Foreground="{DynamicResource ThemeTextBrush}" WindowStartupLocation="CenterScreen" PreviewMouseWheel="UniformScroll_PreviewMouseWheel" PreviewKeyDown="MainWindow_PreviewKeyDown">
+    <Window.Resources>
+        <Style x:Key="ModeSwitchStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#35516F"/>
+            <Setter Property="Background" Value="#E8F1FF"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="SwitchBorder" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="SwitchBorder" Property="Background" Value="#6D9FD0"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="SwitchBorder" Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type ListBox}">
+            <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
+            <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False"/>
+        </Style>
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <Border DockPanel.Dock="Top" Background="{DynamicResource ThemePanelBrush}" Padding="16,11" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Image Width="36" Height="36" Margin="0,0,10,0"
+                           Source="pack://application:,,,/Assets/WebBloxLogo.png"
+                           Stretch="Uniform" ToolTip="Логотип WebBlox"
+                           RenderOptions.BitmapScalingMode="HighQuality" SnapsToDevicePixels="True"/>
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,20,0">
+                        <TextBlock Text="WebBlox" FontSize="18" FontWeight="Bold"/>
+                        <TextBlock Text="VISUAL WEBSITE BUILDER" FontSize="9" Foreground="{DynamicResource ThemeMutedBrush}"/>
+                    </StackPanel>
+                    <Button Content="＋ Нова сторінка" Click="NewPage_Click"/>
+                    <Button Content="▶ Перегляд" Click="Preview_Click" Background="{DynamicResource ThemeAccentBrush}" Foreground="White"/>
+                    <Button Content="Експорт HTML" Click="Export_Click"/>
+                    <Button Content="Зберегти" Click="Save_Click"/>
+                    <Button Content="Відкрити" Click="Open_Click"/>
+                    <Button x:Name="ThemeToggleButton" Click="ThemeToggle_Click" ToolTip="Перемкнути світлу / темну тему" Padding="10,7" Margin="8,3,3,3">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="ThemeIcon" Text="☀" FontFamily="Segoe UI Symbol" FontSize="17" Foreground="#E6A323" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                                <TextBlock.RenderTransform><RotateTransform Angle="0"/></TextBlock.RenderTransform>
+                            </TextBlock>
+                            <TextBlock x:Name="ThemeLabel" Text="Світла" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <TextBlock x:Name="StatusText" Grid.Column="2" Text="Готово · Перетягни тег на полотно" Foreground="{DynamicResource ThemeMutedBrush}" VerticalAlignment="Center" Margin="14,0,4,0"/>
+            </Grid>
+        </Border>
+        <Grid Margin="14">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="300" MinWidth="220"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*" MinWidth="280"/><ColumnDefinition Width="8"/><ColumnDefinition Width="350" MinWidth="270"/></Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="{DynamicResource ThemePanelBrush}" CornerRadius="14" Padding="12" ClipToBounds="True">
+                <ScrollViewer x:Name="LibraryScrollViewer" SizeChanged="LibraryScrollViewer_SizeChanged" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="False" IsDeferredScrollingEnabled="False" PanningMode="VerticalOnly">
+                    <StackPanel>
+                        <TextBlock Text="БІБЛІОТЕКА" FontSize="11" FontWeight="Bold" Foreground="#315F91" Margin="4,4,4,8"/>
+                        <UniformGrid Columns="3" Margin="2,0,2,9">
+                            <RadioButton x:Name="HtmlModeButton" Content="HTML" IsChecked="True" GroupName="EditorMode" Checked="EditorMode_Checked" HorizontalContentAlignment="Center" Padding="8,7" Style="{StaticResource ModeSwitchStyle}"/>
+                            <RadioButton x:Name="CssModeButton" Content="CSS" GroupName="EditorMode" Checked="EditorMode_Checked" HorizontalContentAlignment="Center" Padding="8,7" Style="{StaticResource ModeSwitchStyle}"/>
+                            <RadioButton x:Name="JsModeButton" Content="JS" ToolTip="JavaScript · готові функції та шаблони" GroupName="EditorMode" Checked="EditorMode_Checked" HorizontalContentAlignment="Center" Padding="8,7" Style="{StaticResource ModeSwitchStyle}"/>
+                        </UniformGrid>
+                        <StackPanel x:Name="HtmlLibraryPanel">
+                            <TextBlock Text="HTML · ЕЛЕМЕНТИ СТОРІНКИ" FontSize="10" FontWeight="Bold" Foreground="#315F91" Margin="4,0,4,5"/>
+                            <TextBlock Text="Обери кольорову категорію, потім потрібний елемент. Наведи курсор або вибери тег, щоб прочитати пояснення." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,8"/>
+                            <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" ToolTip="Пошук HTML-тегів" Margin="2,0,2,7"/>
+                            <Grid Margin="0,2,0,0" HorizontalAlignment="Stretch">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="3*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="КАТЕГОРІЇ" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="5,0,4,4"/>
+                                    <ListBox x:Name="HtmlPaletteCategoryList" Height="440" MinHeight="260" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VirtualizingPanel.IsVirtualizing="False" Background="Transparent" BorderThickness="0" Padding="0" SelectionChanged="HtmlPaletteCategory_SelectionChanged" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="1,2,1,3"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="CategoryCard" Background="Transparent" CornerRadius="8" Padding="1"><ContentPresenter HorizontalAlignment="Stretch"/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="CategoryCard" Property="BorderBrush" Value="#6D9FD0"/><Setter TargetName="CategoryCard" Property="BorderThickness" Value="2"/><Setter TargetName="CategoryCard" Property="Background" Value="#C7DCEF"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="CategoryCard" Property="Opacity" Value="0.86"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate><DataTemplate><Border Background="{Binding Color}" CornerRadius="7" Padding="7,9" Margin="2" HorizontalAlignment="Stretch" Width="Auto"><TextBlock Text="{Binding Name}" Foreground="White" FontWeight="SemiBold" FontSize="10" TextWrapping="Wrap" VerticalAlignment="Center"/></Border></DataTemplate></ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Stretch">
+                                    <TextBlock x:Name="HtmlElementCountText" Text="HTML-ЕЛЕМЕНТИ" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="5,0,4,4"/>
+                                    <ListBox x:Name="PaletteList" Height="440" MinHeight="260" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VirtualizingPanel.IsVirtualizing="False" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource ThemeTextBrush}" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" PreviewMouseLeftButtonDown="PaletteList_PreviewMouseLeftButtonDown" PreviewMouseMove="PaletteList_PreviewMouseMove" MouseDoubleClick="PaletteList_MouseDoubleClick" SelectionChanged="HtmlPaletteElement_SelectionChanged" ScrollViewer.CanContentScroll="False">
+                                        <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem"><Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="1,2,1,3"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="ElementCard" Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="7" Padding="7"><ContentPresenter HorizontalAlignment="Stretch"/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="ElementCard" Property="Background" Value="#C7DCEF"/><Setter TargetName="ElementCard" Property="BorderBrush" Value="#8AB8F2"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ElementCard" Property="Opacity" Value="0.86"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style></ListBox.ItemContainerStyle>
+                                    </ListBox>
+                                </StackPanel>
+                            </Grid>
+                            <Border Background="{DynamicResource ThemeSelectedBrush}" CornerRadius="8" Padding="9" Margin="3,8,3,6">
+                                <StackPanel>
+                                    <TextBlock Text="ЩО РОБИТЬ ЦЕЙ ЕЛЕМЕНТ?" FontSize="9" FontWeight="Bold" Foreground="#315F91"/>
+                                    <TextBlock x:Name="HtmlPaletteHintText" Text="Вибери HTML-елемент зі списку, щоб побачити його призначення." TextWrapping="Wrap" FontSize="11" Foreground="#37649D" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <TextBlock Text="Перетягни елемент на полотно або двічі клацни, щоб додати його." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,3,4,4"/>
+                        </StackPanel>
+                        <StackPanel x:Name="CssLibraryPanel" Visibility="Collapsed">
+                            <TextBlock Text="CSS · ОФОРМЛЕННЯ САЙТУ" FontSize="10" FontWeight="Bold" Foreground="#315F91" Margin="4,0,4,5"/>
+                            <TextBlock Text="Обери кольорову категорію, потім потрібну властивість. Не потрібно знати CSS-код." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,8"/>
+                            <Grid Margin="0,2,0,0" HorizontalAlignment="Stretch">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="3*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="КАТЕГОРІЇ" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="5,0,4,4"/>
+                                    <ListBox x:Name="CssPaletteCategoryList" Height="440" MinHeight="260" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VirtualizingPanel.IsVirtualizing="False" Background="Transparent" BorderThickness="0" Padding="0" SelectionChanged="CssPaletteCategory_SelectionChanged" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="1,2,1,3"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="CategoryCard" Background="Transparent" CornerRadius="8" Padding="1"><ContentPresenter HorizontalAlignment="Stretch"/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="CategoryCard" Property="BorderBrush" Value="#6D9FD0"/><Setter TargetName="CategoryCard" Property="BorderThickness" Value="2"/><Setter TargetName="CategoryCard" Property="Background" Value="#C7DCEF"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="CategoryCard" Property="Opacity" Value="0.86"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate><DataTemplate><Border Background="{Binding Color}" CornerRadius="7" Padding="7,9" Margin="2" HorizontalAlignment="Stretch" Width="Auto"><TextBlock Text="{Binding Name}" Foreground="White" FontWeight="SemiBold" FontSize="10" TextWrapping="Wrap" VerticalAlignment="Center"/></Border></DataTemplate></ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="ВЛАСТИВОСТІ" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="5,0,4,4"/>
+                                    <ListBox x:Name="CssPalettePropertyList" Height="440" MinHeight="260" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VirtualizingPanel.IsVirtualizing="False" Background="Transparent" BorderThickness="0" Padding="0" SelectionChanged="CssPaletteProperty_SelectionChanged" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False">
+                                        <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem"><Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="1,2,1,3"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="PropertyCard" Background="Transparent" CornerRadius="8" Padding="2"><ContentPresenter HorizontalAlignment="Stretch"/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="PropertyCard" Property="Background" Value="#C7DCEF"/><Setter TargetName="PropertyCard" Property="BorderBrush" Value="#8AB8F2"/><Setter TargetName="PropertyCard" Property="BorderThickness" Value="1"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="PropertyCard" Property="Opacity" Value="0.86"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style></ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate><DataTemplate><Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="7" Padding="8" Margin="2" HorizontalAlignment="Stretch"><StackPanel><TextBlock Text="{Binding DisplayName}" Foreground="#2D4560" FontWeight="SemiBold" FontSize="11" TextWrapping="Wrap"/><TextBlock Text="{Binding Property}" Foreground="{DynamicResource ThemeMutedBrush}" FontSize="9" Margin="0,2,0,0" TextWrapping="Wrap"/><TextBlock Text="{Binding Hint}" Foreground="#526681" FontSize="9" Margin="0,4,0,0" TextWrapping="Wrap"/></StackPanel></Border></DataTemplate></ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </Grid>
+                            <Border Background="{DynamicResource ThemeAccentSoftBrush}" CornerRadius="8" Padding="9" Margin="3,8,3,6">
+                                <StackPanel>
+                                    <TextBlock Text="ЩО ЦЕ РОБИТЬ?" FontSize="9" FontWeight="Bold" Foreground="#315F91"/>
+                                    <TextBlock x:Name="CssPaletteHintText" Text="Вибери властивість зі списку." TextWrapping="Wrap" FontSize="11" Foreground="#2D4560" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <TextBlock Text="Значення" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,4,4,3"/>
+                            <TextBox x:Name="CssPaletteValueBox" ToolTip="Наприклад: blue, 20px, center"/>
+                            <Button Content="＋ Додати властивість" Click="AddCssPaletteProperty_Click" Background="#8B5CF6" Foreground="White" HorizontalAlignment="Stretch" Margin="2,7,2,4"/>
+                            <TextBlock Text="Після додавання відкрий вкладку CSS справа, щоб побачити всі стилі та код." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,3,4,4"/>
+                        </StackPanel>
+                        <StackPanel x:Name="JsLibraryPanel" Visibility="Collapsed">
+                            <TextBlock Text="JS · ЛОГІКА ТА ГОТОВІ ФУНКЦІЇ" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}" Margin="4,0,4,5"/>
+                            <TextBlock Text="Обери готову функцію для кнопок, форм, анімацій, даних або мініігор. Її можна додати до коду чи як візуальний блок." TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,8"/>
+                            <TextBox x:Name="JsFunctionSearchBox" TextChanged="JsFunctionSearch_TextChanged" ToolTip="Пошук готових JavaScript-функцій" Margin="2,0,2,6"/>
+                            <Grid Margin="0,2,0,0" HorizontalAlignment="Stretch">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="3*"/></Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="КАТЕГОРІЇ" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="5,0,4,4"/>
+                                    <ListBox x:Name="JsFunctionCategoryList" Height="360" MinHeight="230" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" Background="Transparent" BorderThickness="0" Padding="0" SelectionChanged="JsFunctionCategory_SelectionChanged" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False" ScrollViewer.IsDeferredScrollingEnabled="False">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="1,2,1,3"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="CategoryCard" Background="Transparent" CornerRadius="8" Padding="1"><ContentPresenter HorizontalAlignment="Stretch"/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="CategoryCard" Property="BorderBrush" Value="#6D9FD0"/><Setter TargetName="CategoryCard" Property="BorderThickness" Value="2"/><Setter TargetName="CategoryCard" Property="Background" Value="#C7DCEF"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="CategoryCard" Property="Opacity" Value="0.86"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate><DataTemplate><Border Background="{Binding Color}" CornerRadius="7" Padding="7,9" Margin="2" HorizontalAlignment="Stretch" Width="Auto"><TextBlock Text="{Binding Name}" Foreground="White" FontWeight="SemiBold" FontSize="10" TextWrapping="Wrap" VerticalAlignment="Center"/></Border></DataTemplate></ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Stretch">
+                                    <TextBlock x:Name="JsFunctionCountText" Text="ГОТОВІ ФУНКЦІЇ" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="5,0,4,4"/>
+                                    <ListBox x:Name="JsFunctionPalette" Height="360" MinHeight="230" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Background="Transparent" BorderThickness="0" Padding="0" SelectionChanged="JsFunctionPalette_SelectionChanged" MouseDoubleClick="JsFunctionPalette_MouseDoubleClick" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False" ScrollViewer.IsDeferredScrollingEnabled="False">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="1,2,1,3"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="JsFunctionCard" Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="7"><ContentPresenter HorizontalAlignment="Stretch"/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="JsFunctionCard" Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/><Setter TargetName="JsFunctionCard" Property="BorderThickness" Value="2"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="JsFunctionCard" Property="Opacity" Value="0.88"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemTemplate><DataTemplate><Border Background="{Binding Color}" CornerRadius="6" Padding="7" Margin="1"><StackPanel><TextBlock Text="{Binding Title}" Foreground="White" FontSize="11" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding Description}" Foreground="#F7F9FC" FontSize="9" TextWrapping="Wrap" Margin="0,3,0,0"/><TextBlock Text="{Binding Category}" Foreground="#FFFFFF" FontSize="8" Opacity="0.88" Margin="0,3,0,0"/></StackPanel></Border></DataTemplate></ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </Grid>
+                            <Border Background="{DynamicResource ThemeAccentSoftBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="9" Margin="3,7,3,5">
+                                <StackPanel>
+                                    <TextBlock x:Name="JsFunctionDetailsTitleText" Text="ОБЕРИ ФУНКЦІЮ" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}"/>
+                                    <TextBlock x:Name="JsFunctionDetailsDescriptionText" Text="Вибери картку, щоб переглянути опис і вимоги." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeTextBrush}" Margin="0,4,0,0"/>
+                                    <TextBlock x:Name="JsFunctionRequirementsText" Text="" TextWrapping="Wrap" FontSize="9" Foreground="{DynamicResource ThemeMutedBrush}" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Button Content="＋ Додати до JS-коду" Click="AppendJsFunction_Click" Background="{DynamicResource ThemeAccentBrush}" Foreground="White" HorizontalAlignment="Stretch" Margin="2,3,2,4" ToolTip="Додати вибрану функцію в кінець редактора JavaScript"/>
+                            <WrapPanel HorizontalAlignment="Stretch">
+                                <Button Content="Замінити JS" Click="ReplaceJsFunction_Click" ToolTip="Замінити поточний JavaScript вибраним шаблоном"/>
+                                <Button Content="Додати як блок" Click="AddJsFunctionAsBlock_Click" ToolTip="Додати всю функцію як окремий блок у JS-бібліотеці справа"/>
+                                <Button Content="Візуальні блоки →" Click="ShowJsBlocks_Click" ToolTip="Відкрити редактор візуальних JavaScript-блоків справа"/>
+                            </WrapPanel>
+                            <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="8" Margin="3,7,3,4"><TextBlock Text="Порада: після додавання перевір селектори та ID у коді. Наприклад, #myButton означає елемент з ID myButton. Для мережевих запитів сайт може вимагати доступ до API (CORS)." TextWrapping="Wrap" FontSize="9" Foreground="{DynamicResource ThemeMutedBrush}"/></Border>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            <GridSplitter Grid.Column="1" Width="8" HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                          ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
+                          Background="{DynamicResource ThemeBorderBrush}" Opacity="0.75" Cursor="SizeWE" ToolTip="Потягни, щоб змінити ширину бібліотеки"/>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Grid Margin="5,2,5,12">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel><TextBlock Text="РОБОЧЕ ПОЛОТНО · HTML-СТРУКТУРА" FontSize="11" FontWeight="Bold" Foreground="#315F91"/><TextBlock Text="Перетягуй теги, вибирай блоки й налаштовуй вкладеність." FontSize="11" Foreground="{DynamicResource ThemeMutedBrush}" Margin="0,4,0,0"/></StackPanel>
+                    <Border Grid.Column="1" Background="{DynamicResource ThemeAccentSoftBrush}" CornerRadius="8" Padding="10,7" VerticalAlignment="Center"><TextBlock Text="HTML + CSS + JS  ·  LIVE PREVIEW" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}"/></Border>
+                </Grid>
+                <Border Grid.Row="1" Background="{DynamicResource ThemeCanvasBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="16" Padding="10" AllowDrop="True" DragOver="Canvas_DragOver" Drop="Canvas_Drop">
+                    <Grid>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <Border Grid.Row="0" Background="{DynamicResource ThemePanelBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="5" Margin="1,0,1,8">
+                            <DockPanel LastChildFill="True">
+                                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="МАСШТАБ" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" VerticalAlignment="Center" Margin="5,0,4,0"/>
+                                    <Button Content="−" Click="CanvasZoomOut_Click" ToolTip="Зменшити картки" Padding="9,4" Margin="2" MinWidth="30"/>
+                                    <TextBlock x:Name="CanvasZoomText" Text="100%" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource ThemeTextBrush}" VerticalAlignment="Center" MinWidth="38" TextAlignment="Center"/>
+                                    <Button Content="+" Click="CanvasZoomIn_Click" ToolTip="Збільшити картки" Padding="9,4" Margin="2" MinWidth="30"/>
+                                    <Button Content="100%" Click="CanvasZoomReset_Click" ToolTip="Повернути стандартний масштаб" Padding="7,4" Margin="2" FontSize="10"/>
+                                </StackPanel>
+                                <WrapPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <Button Content="Згорнути все" Click="CollapseCanvas_Click" ToolTip="Згорнути вкладені HTML-блоки" Padding="7,4" Margin="2" FontSize="10"/>
+                                    <Button Content="Розгорнути все" Click="ExpandCanvas_Click" ToolTip="Розгорнути всі HTML-блоки" Padding="7,4" Margin="2" FontSize="10"/>
+                                </WrapPanel>
+                            </DockPanel>
+                        </Border>
+                        <TreeView Grid.Row="1" x:Name="CanvasTree" Background="Transparent" BorderThickness="0" AllowDrop="True" SelectedItemChanged="CanvasTree_SelectedItemChanged" PreviewMouseLeftButtonDown="CanvasTree_PreviewMouseLeftButtonDown" DragOver="Canvas_DragOver" Drop="Canvas_Drop" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="False" ScrollViewer.IsDeferredScrollingEnabled="False">
+                            <TreeView.Resources><Style TargetType="TreeViewItem"><Setter Property="FontSize" Value="13"/><Setter Property="Foreground" Value="#263B53"/><Setter Property="Padding" Value="7,6"/><Setter Property="Margin" Value="2,2,2,3"/><Setter Property="Background" Value="#EDF2F8"/><Setter Property="BorderBrush" Value="#E2EAF5"/><Setter Property="BorderThickness" Value="1"/></Style></TreeView.Resources>
+                        </TreeView>
+                        <StackPanel Grid.Row="1" x:Name="EmptyCanvasHint" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" MaxWidth="330">
+                            <Border Width="64" Height="64" CornerRadius="18" Background="{DynamicResource ThemeSelectedBrush}" HorizontalAlignment="Center"><TextBlock Text="＋" FontSize="38" Foreground="{DynamicResource ThemeAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                            <TextBlock Text="Тут буде твій сайт" FontSize="19" FontWeight="SemiBold" Foreground="#2D4560" HorizontalAlignment="Center" Margin="0,14,0,5"/>
+                            <TextBlock Text="1. Знайди потрібний HTML-тег зліва.&#10;2. Перетягни його сюди або двічі клацни.&#10;3. Додавай дочірні блоки всередину контейнерів.&#10;Картки можна масштабувати кнопками вище." TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource ThemeMutedBrush}" FontSize="12" LineHeight="20"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+            <GridSplitter Grid.Column="3" Width="8" HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                          ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" ShowsPreview="True"
+                          Background="{DynamicResource ThemeBorderBrush}" Opacity="0.75" Cursor="SizeWE" ToolTip="Потягни, щоб змінити ширину налаштувань"/>
+            <Border Grid.Column="4" Background="{DynamicResource ThemePanelBrush}" CornerRadius="14" Padding="10">
+                <TabControl x:Name="InspectorTabs" Background="Transparent" BorderThickness="0" SelectionChanged="InspectorTabs_SelectionChanged">
+                    <TabItem Header="HTML · Властивості"><ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="False" IsDeferredScrollingEnabled="False" PanningMode="VerticalOnly"><StackPanel Margin="4,10,4,8">
+                        <TextBlock Text="НАЛАШТУВАННЯ БЛОКУ" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,7"/>
+                        <TextBlock Text="Вибери елемент на полотні. Зміни застосовуються до вибраного блоку." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,8"/>
+                        <TextBlock Text="HTML-тег" Style="{StaticResource FieldLabel}"/><TextBox x:Name="TagBox" IsReadOnly="True"/>
+                        <TextBlock Text="Текст / вміст" Style="{StaticResource FieldLabel}"/><TextBox x:Name="ContentBox" AcceptsReturn="True" Height="70" TextChanged="Property_TextChanged" TextWrapping="Wrap"/>
+                        <TextBlock Text="ID" Style="{StaticResource FieldLabel}"/><TextBox x:Name="IdBox" TextChanged="Property_TextChanged"/>
+                        <TextBlock Text="Class" Style="{StaticResource FieldLabel}"/><TextBox x:Name="ClassBox" TextChanged="Property_TextChanged"/>
+                        <TextBlock Text="Посилання (href)" Style="{StaticResource FieldLabel}"/><TextBox x:Name="HrefBox" TextChanged="Property_TextChanged"/>
+                        <TextBlock Text="Джерело медіа (src)" Style="{StaticResource FieldLabel}"/><TextBox x:Name="SrcBox" TextChanged="Property_TextChanged"/>
+                        <TextBlock Text="Alt / placeholder / type / rel / meta name" Style="{StaticResource FieldLabel}"/><TextBox x:Name="ExtraBox" TextChanged="Property_TextChanged"/>
+                        <Separator Margin="3,12" Background="{DynamicResource ThemeBorderBrush}"/><TextBlock Text="ШВИДКЕ ОФОРМЛЕННЯ" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="3,2,3,5"/>
+                        <TextBlock Text="Колір тексту" Style="{StaticResource FieldLabel}"/><TextBox x:Name="ColorBox" TextChanged="Property_TextChanged" ToolTip="#222222 або red"/>
+                        <TextBlock Text="Колір фону" Style="{StaticResource FieldLabel}"/><TextBox x:Name="BackgroundBox" TextChanged="Property_TextChanged" ToolTip="#f0f0f0"/>
+                        <TextBlock Text="Розмір шрифту" Style="{StaticResource FieldLabel}"/><TextBox x:Name="FontSizeBox" TextChanged="Property_TextChanged" ToolTip="Наприклад 24px"/>
+                        <TextBlock x:Name="SpacingLabel" Text="Відступи" Style="{StaticResource FieldLabel}"/><ComboBox x:Name="SpacingTypeBox" SelectedIndex="0" SelectionChanged="SpacingType_SelectionChanged" ToolTip="Вибери, який саме відступ змінювати" Margin="0,0,0,4"><ComboBoxItem Content="Зовнішній відступ — margin"/><ComboBoxItem Content="Внутрішній відступ — padding"/></ComboBox><TextBox x:Name="SpacingBox" TextChanged="Property_TextChanged" ToolTip="Наприклад 12px"/>
+                        <TextBlock Text="Додатковий CSS для блоку" Style="{StaticResource FieldLabel}"/><TextBox x:Name="CustomCssBox" AcceptsReturn="True" Height="66" TextChanged="Property_TextChanged" TextWrapping="Wrap"/>
+                        <WrapPanel Margin="0,10,0,0"><Button Content="Застосувати" Click="Apply_Click" Background="{DynamicResource ThemeAccentBrush}"/><Button Content="Видалити" Click="Delete_Click" Background="#FCEBEC" Foreground="#B64B57"/><Button Content="↑" Click="MoveUp_Click" ToolTip="Перемістити вище"/><Button Content="↓" Click="MoveDown_Click" ToolTip="Перемістити нижче"/></WrapPanel>
+                    </StackPanel></ScrollViewer></TabItem>
+                    <TabItem Header="CSS · Designer">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="False" IsDeferredScrollingEnabled="False" PanningMode="VerticalOnly">
+                            <StackPanel Margin="4,10,4,8">
+                                <TextBlock Text="НАЛАШТУВАННЯ СТИЛЮ" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,7"/>
+                                <TextBlock Text="Вибери елемент або CSS-селектор. Додавай властивості та змінюй їхні значення — результат оновиться автоматично." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,9"/>
+
+                                <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="2,2,2,7">
+                                    <StackPanel>
+                                        <TextBlock Text="1. ЦІЛЬ СТИЛЮ" FontSize="10" FontWeight="Bold" Foreground="#315F91" Margin="2,0,2,4"/>
+                                        <TextBlock Text="CSS-селектор" Style="{StaticResource FieldLabel}"/><TextBox x:Name="CssSelectorBox" Text="body" TextChanged="CssSelector_TextChanged" ToolTip="Наприклад: .card, #header, button:hover"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="2,0,2,7">
+                                    <StackPanel>
+                                        <TextBlock Text="2. ДОДАТИ ВЛАСТИВІСТЬ" FontSize="10" FontWeight="Bold" Foreground="#315F91" Margin="2,0,2,4"/>
+                                        <TextBlock Text="Група властивостей" Style="{StaticResource FieldLabel}"/><ComboBox x:Name="CssCategoryBox" SelectionChanged="CssCategory_SelectionChanged"/>
+                                        <TextBlock Text="Що змінюємо? (CSS-властивість)" Style="{StaticResource FieldLabel}"/><ComboBox x:Name="CssPropertyBox" IsEditable="True" IsTextSearchEnabled="True" ToolTip="Можна вписати будь-яку CSS-властивість вручну"/>
+                                        <TextBlock Text="Нове значення" Style="{StaticResource FieldLabel}"/><TextBox x:Name="CssValueBox" ToolTip="Наприклад: #2878e5, 20px, flex, 1fr, clamp(16px, 3vw, 32px)"/>
+                                        <Button Content="＋ Додати CSS-властивість" Click="AddCssDeclaration_Click" Background="{DynamicResource ThemeAccentBrush}" Foreground="White" HorizontalAlignment="Stretch" Margin="3,8,3,2"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="2,0,2,7">
+                                    <StackPanel>
+                                        <TextBlock Text="3. СТИЛІ ЕЛЕМЕНТА" FontSize="10" FontWeight="Bold" Foreground="#315F91" Margin="2,0,2,5"/>
+                                        <TextBlock Text="Активні CSS-властивості та їхні значення" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" Margin="2,0,2,5"/>
+                                        <ListBox x:Name="CssBlocksList" SelectionChanged="CssBlocksList_SelectionChanged" MinHeight="105" MaxHeight="210" BorderThickness="0" Background="{DynamicResource ThemeCardBrush}" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False" ScrollViewer.IsDeferredScrollingEnabled="False">
+                                            <ListBox.ItemTemplate><DataTemplate><Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="7" Padding="9" Margin="2"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="5"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Border Background="{DynamicResource ThemeAccentBrush}" CornerRadius="3" Margin="0,1,8,1"/><StackPanel Grid.Column="1"><TextBlock Text="{Binding Property}" FontWeight="Bold" Foreground="{DynamicResource ThemeTextBrush}" FontSize="11"/><TextBlock Text="{Binding Value}" Foreground="{DynamicResource ThemeMutedBrush}" TextWrapping="Wrap" FontSize="11" Margin="0,2,0,0"/></StackPanel></Grid></Border></DataTemplate></ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <Button Content="Видалити вибрану властивість" Click="RemoveCssDeclaration_Click" HorizontalAlignment="Stretch" Margin="3,6,3,2"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="2,0,2,7">
+                                    <StackPanel>
+                                        <TextBlock Text="4. АДАПТИВНІСТЬ" FontSize="10" FontWeight="Bold" Foreground="#315F91" Margin="2,0,2,4"/>
+                                        <TextBlock Text="Застосувати поточні стилі лише на екранах із шириною до (px)" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" TextWrapping="Wrap" Margin="2,3,2,4"/>
+                                        <TextBox x:Name="CssBreakpointBox" Text="768" ToolTip="Наприклад 768 або 1024"/>
+                                        <Button Content="＋ Створити media query" Click="AddCssMedia_Click" HorizontalAlignment="Stretch"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="2,0,2,7">
+                                    <StackPanel>
+                                        <TextBlock Text="5. ГОТОВІ РІШЕННЯ" FontSize="10" FontWeight="Bold" Foreground="#315F91" Margin="2,0,2,5"/>
+                                        <WrapPanel><Button Content="Flex-контейнер" Tag="display: flex; gap: 16px; align-items: center;" Click="CssPreset_Click"/><Button Content="Grid 3 колонки" Tag="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;" Click="CssPreset_Click"/><Button Content="Градієнт" Tag="background: linear-gradient(135deg, #2878e5, #8b5cf6); color: white;" Click="CssPreset_Click"/><Button Content="Картка" Tag="padding: 20px; border-radius: 16px; background: white; box-shadow: 0 8px 24px rgba(20,40,80,.12);" Click="CssPreset_Click"/><Button Content="Тінь" Tag="box-shadow: 0 12px 30px rgba(0,0,0,.16);" Click="CssPreset_Click"/><Button Content="Hover-кнопка" Tag="transition: transform .2s ease, box-shadow .2s ease; cursor: pointer;" Click="CssPreset_Click"/><Button Content="Sticky меню" Tag="position: sticky; top: 0; z-index: 100;" Click="CssPreset_Click"/><Button Content="Адаптивне фото" Tag="width: 100%; height: auto; object-fit: cover;" Click="CssPreset_Click"/><Button Content="Glassmorphism" Tag="background: rgba(255,255,255,.18); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.3);" Click="CssPreset_Click"/><Button Content="Анімація pulse" Tag="animation: webblox-pulse 1.8s ease-in-out infinite;" Click="CssPreset_Click"/><Button Content="Центрування" Tag="display: flex; justify-content: center; align-items: center;" Click="CssPreset_Click"/><Button Content="Grid auto-fit" Tag="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;" Click="CssPreset_Click"/><Button Content="Pill-кнопка" Tag="border-radius: 999px; padding: 10px 22px;" Click="CssPreset_Click"/><Button Content="CSS-змінна" Tag="--brand-color: #2878e5; color: var(--brand-color);" Click="CssPreset_Click"/></WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="2,0,2,7">
+                                    <StackPanel>
+                                        <TextBlock Text="6. ІМПОРТ / ЕКСПОРТ" FontSize="10" FontWeight="Bold" Foreground="#315F91" Margin="2,0,2,5"/>
+                                        <WrapPanel><Button Content="Імпорт .css" Click="ImportCss_Click"/><Button Content="Експорт .css" Click="ExportCss_Click"/><Button Content="Очистити CSS" Click="ClearCss_Click"/></WrapPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="2,0,2,4">
+                                    <StackPanel>
+                                        <TextBlock Text="7. ПОВНИЙ CSS-КОД" FontSize="10" FontWeight="Bold" Foreground="#315F91" Margin="2,0,2,4"/>
+                                        <TextBlock Text="Можна редагувати код напряму: псевдокласи, медіазапити, змінні, keyframes та сучасні CSS-властивості." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" Margin="2,0,2,5"/>
+                                        <TextBox x:Name="GlobalCssBox" Height="300" AcceptsReturn="True" AcceptsTab="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12" Background="{DynamicResource ThemeCodeBrush}" Foreground="{DynamicResource ThemeTextBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" Margin="3,4,3,8" TextChanged="GlobalCss_TextChanged" ToolTip="Повний CSS-код сторінки"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem Header="JavaScript · Логіка">
+                        <TabControl x:Name="JavaScriptEditorTabs" Background="Transparent" BorderThickness="0">
+                            <TabItem Header="🧩 Візуальні блоки">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="False" IsDeferredScrollingEnabled="False" PanningMode="VerticalOnly">
+                                    <StackPanel Margin="4,8,4,8">
+                                        <TextBlock Text="JAVASCRIPT · БЛОКИ" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}" Margin="4,0,4,5"/>
+                                        <TextBlock Text="Обирай кольорові блоки, додавай їх до послідовності, змінюй параметри й генеруй робочий JavaScript. Можна двічі клацнути блок або перетягнути його в робочу область." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,8"/>
+
+                                        <TextBlock Text="ПОШУК БЛОКІВ" Style="{StaticResource FieldLabel}"/>
+                                        <TextBox x:Name="JsBlockSearchBox" TextChanged="JsBlockSearch_TextChanged" ToolTip="Наприклад: кнопка, змінна, анімація, fetch"/>
+                                        <TextBlock Text="КАТЕГОРІЯ" Style="{StaticResource FieldLabel}"/>
+                                        <ComboBox x:Name="JsBlockCategoryBox" SelectionChanged="JsBlockCategory_SelectionChanged" IsTextSearchEnabled="True"/>
+
+                                        <TextBlock Text="БІБЛІОТЕКА БЛОКІВ" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="3,7,3,4"/>
+                                        <ListBox x:Name="JsBlockPalette" Height="145" AllowDrop="False" Background="Transparent" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" PreviewMouseLeftButtonDown="JsBlockPalette_PreviewMouseLeftButtonDown" PreviewMouseMove="JsBlockPalette_PreviewMouseMove" MouseDoubleClick="JsBlockPalette_MouseDoubleClick">
+                                            <ListBox.ItemContainerStyle>
+                                                <Style TargetType="ListBoxItem">
+                                                    <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="1,2,1,3"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="PaletteBlockBorder" CornerRadius="8" BorderThickness="2" BorderBrush="Transparent"><ContentPresenter/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="PaletteBlockBorder" Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="PaletteBlockBorder" Property="Opacity" Value="0.88"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+                                                </Style>
+                                            </ListBox.ItemContainerStyle>
+                                            <ListBox.ItemTemplate><DataTemplate><Border Background="{Binding Color}" CornerRadius="7" Padding="8,6" Margin="2"><StackPanel><TextBlock Text="{Binding Title}" Foreground="White" FontWeight="SemiBold" FontSize="11" TextWrapping="Wrap"/><TextBlock Text="{Binding Description}" Foreground="#F4F7FB" Opacity="0.96" FontSize="9" TextWrapping="Wrap" Margin="0,2,0,0"/></StackPanel></Border></DataTemplate></ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <WrapPanel Margin="0,2,0,7">
+                                            <Button Content="＋ Додати блок" Click="AddJsBlock_Click" Background="{DynamicResource ThemeAccentBrush}" Foreground="White"/>
+                                            <Button Content="Додати приклад" Click="AddJsSample_Click" ToolTip="Додає готовий набір пов'язаних блоків"/>
+                                        </WrapPanel>
+
+                                        <TextBlock Text="МОЯ ПОСЛІДОВНІСТЬ · перетягни сюди блоки" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="3,5,3,4"/>
+                                        <ListBox x:Name="JsBlockWorkspace" Height="174" AllowDrop="True" Drop="JsBlockWorkspace_Drop" DragOver="JsBlockWorkspace_DragOver" SelectionChanged="JsBlockWorkspace_SelectionChanged" Background="{DynamicResource ThemeCodeBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="False" ScrollViewer.IsDeferredScrollingEnabled="False">
+                                            <ListBox.ItemContainerStyle>
+                                                <Style TargetType="ListBoxItem"><Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="2"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="Background" Value="Transparent"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="WorkspaceBlockBorder" Background="{DynamicResource ThemeCardBrush}" BorderBrush="{Binding Color}" BorderThickness="4,1,1,1" CornerRadius="6" Padding="6"><ContentPresenter/></Border><ControlTemplate.Triggers><Trigger Property="IsSelected" Value="True"><Setter TargetName="WorkspaceBlockBorder" Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/><Setter TargetName="WorkspaceBlockBorder" Property="BorderThickness" Value="4,2,2,2"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
+                                            </ListBox.ItemContainerStyle>
+                                            <ListBox.ItemTemplate><DataTemplate><StackPanel><TextBlock Text="{Binding Title}" Foreground="{DynamicResource ThemeTextBrush}" FontSize="10" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Text="{Binding Summary}" Foreground="{DynamicResource ThemeMutedBrush}" FontSize="9" TextWrapping="Wrap" Margin="0,2,0,0"/></StackPanel></DataTemplate></ListBox.ItemTemplate>
+                                        </ListBox>
+                                        <WrapPanel Margin="0,4,0,8">
+                                            <Button Content="↑ Вище" Click="MoveJsBlockUp_Click" ToolTip="Перемістити блок вище"/>
+                                            <Button Content="↓ Нижче" Click="MoveJsBlockDown_Click" ToolTip="Перемістити блок нижче"/>
+                                            <Button Content="Копія" Click="DuplicateJsBlock_Click"/>
+                                            <Button Content="Видалити" Click="RemoveJsBlock_Click"/>
+                                            <Button Content="Очистити" Click="ClearJsBlocks_Click"/>
+                                        </WrapPanel>
+
+                                        <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="0,0,0,7">
+                                            <StackPanel>
+                                                <TextBlock Text="ПАРАМЕТРИ ВИБРАНОГО БЛОКА" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}" Margin="2,0,2,5"/>
+                                                <TextBlock x:Name="JsBlockParam1Label" Text="Параметр 1" Style="{StaticResource FieldLabel}"/><TextBox x:Name="JsBlockParam1Box" TextChanged="JsBlockParameter_TextChanged"/>
+                                                <TextBlock x:Name="JsBlockParam2Label" Text="Параметр 2" Style="{StaticResource FieldLabel}"/><TextBox x:Name="JsBlockParam2Box" TextChanged="JsBlockParameter_TextChanged"/>
+                                                <TextBlock x:Name="JsBlockParam3Label" Text="Параметр 3" Style="{StaticResource FieldLabel}"/><TextBox x:Name="JsBlockParam3Box" TextChanged="JsBlockParameter_TextChanged"/>
+                                                <TextBlock x:Name="JsBlockBodyLabel" Text="Код блока" Style="{StaticResource FieldLabel}"/><TextBox x:Name="JsBlockBodyBox" AcceptsReturn="True" AcceptsTab="True" Height="82" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="11" TextChanged="JsBlockParameter_TextChanged" Background="{DynamicResource ThemeCodeBrush}" Foreground="{DynamicResource ThemeTextBrush}" ToolTip="Для подій, умов, циклів і функцій тут можна вказати кілька рядків JavaScript."/>
+                                                <TextBlock Text="Підказка: для селектора можна вписати ID (myButton), #id, .class або CSS-селектор. У виразах, умовах і коді використовуй звичайний JavaScript." TextWrapping="Wrap" FontSize="9" Foreground="{DynamicResource ThemeMutedBrush}" Margin="2,5,2,0"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <WrapPanel Margin="0,0,0,7">
+                                            <Button Content="⚙ Згенерувати JS" Click="GenerateJsFromBlocks_Click" Background="{DynamicResource ThemeAccentBrush}" Foreground="White" ToolTip="Замінити редактор JavaScript кодом із блоків"/>
+                                            <Button Content="＋ Додати до коду" Click="AppendJsFromBlocks_Click" ToolTip="Додати згенерований код в кінець поточного JavaScript"/>
+                                        </WrapPanel>
+                                        <WrapPanel>
+                                            <Button Content="Імпорт блоків" Click="ImportJsBlocks_Click"/>
+                                            <Button Content="Експорт блоків" Click="ExportJsBlocks_Click"/>
+                                        </WrapPanel>
+                                        <Border Background="{DynamicResource ThemeAccentSoftBrush}" CornerRadius="8" Padding="8" Margin="0,8,0,2"><TextBlock Text="Блоки зберігаються в .webblox. Щоб виконати їх на сторінці, згенеруй JS-код (або додай його до редактора), потім натисни «Перегляд». Використовуй лише власний код, якому довіряєш." TextWrapping="Wrap" FontSize="9" Foreground="{DynamicResource ThemeTextBrush}"/></Border>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </TabItem>
+                            <TabItem Header="⌨ Код JavaScript">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="False" IsDeferredScrollingEnabled="False" PanningMode="VerticalOnly">
+                                    <StackPanel Margin="4,8,4,8">
+                                        <TextBlock Text="JAVASCRIPT · РЕДАКТОР КОДУ" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,7"/>
+                                        <TextBlock Text="Редагуй код вручну або згенеруй його з візуальних блоків. Код збережеться в проєкті й потрапить до експортованого HTML." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" Margin="4,0,4,9"/>
+                                        <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="2,2,2,7">
+                                            <StackPanel>
+                                                <TextBlock Text="ШВИДКІ ПРИКЛАДИ" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}" Margin="2,0,2,5"/>
+                                                <WrapPanel><Button Content="Клік по кнопці" Tag="alert" Click="JavaScriptExample_Click"/><Button Content="Лічильник" Tag="counter" Click="JavaScriptExample_Click"/></WrapPanel>
+                                                <TextBlock Text="Для прикладу кнопки задай HTML-кнопці ID myButton. Для лічильника створи кнопку з ID counterButton та текстовий елемент з ID counterValue." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeMutedBrush}" Margin="3,5,3,2"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Background="{DynamicResource ThemeCardBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" BorderThickness="1" CornerRadius="9" Padding="9" Margin="2,0,2,7">
+                                            <StackPanel>
+                                                <TextBlock Text="JAVASCRIPT-КОД" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ThemeAccentBrush}" Margin="2,0,2,5"/>
+                                                <TextBox x:Name="JavaScriptBox" MinHeight="300" AcceptsReturn="True" AcceptsTab="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12" Background="{DynamicResource ThemeCodeBrush}" Foreground="{DynamicResource ThemeTextBrush}" BorderBrush="{DynamicResource ThemeBorderBrush}" Margin="3,4,3,8" TextChanged="JavaScript_TextChanged" ToolTip="JavaScript, який буде виконано в браузері під час перегляду сторінки"/>
+                                                <WrapPanel><Button Content="Імпорт .js" Click="ImportJavaScript_Click"/><Button Content="Експорт .js" Click="ExportJavaScript_Click"/><Button Content="Очистити" Click="ClearJavaScript_Click"/></WrapPanel>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Background="{DynamicResource ThemeAccentSoftBrush}" CornerRadius="9" Padding="9" Margin="2,0,2,4"><TextBlock Text="Перегляд відкривається в браузері. Помилки виконання можна побачити в консолі браузера (F12). Код блоків спершу потрібно перенести в редактор JS кнопкою «Згенерувати JS» або «Додати до коду»." TextWrapping="Wrap" FontSize="10" Foreground="{DynamicResource ThemeTextBrush}"/></Border>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </TabItem>
+                        </TabControl>
+                    </TabItem>
+                </TabControl>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

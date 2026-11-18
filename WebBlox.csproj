@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>WebBlox</RootNamespace>
+    <AssemblyName>WebBlox</AssemblyName>
+    <ApplicationIcon>Assets\WebBloxLogo.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Assets\WebBloxLogo.png" />
+    <Resource Include="Assets\WebBloxLogo.ico" />
+  </ItemGroup>
+</Project>

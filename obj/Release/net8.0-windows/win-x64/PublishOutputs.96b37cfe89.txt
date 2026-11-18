@@ -1,0 +1,2 @@
+C:\Users\vital\OneDrive\Desktop\WebBlox-Backspace-Canvas-Fix(2)\WebBlox\bin\Release\net8.0-windows\win-x64\publish\WebBlox.pdb
+C:\Users\vital\OneDrive\Desktop\WebBlox-Backspace-Canvas-Fix(2)\WebBlox\bin\Release\net8.0-windows\win-x64\publish\WebBlox.exe
